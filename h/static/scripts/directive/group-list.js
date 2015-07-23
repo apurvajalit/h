@@ -9,6 +9,9 @@
 module.exports = function () {
   return {
     restrict: 'AE',
+    scope: {
+      userid: '@'
+    },
     templateUrl: 'group_list.html'
   };
 };

@@ -44,7 +44,8 @@
 
       <div class="pull-right dropdown group-list"
            ng-if="feature('groups')"
-           group-list="">
+           group-list=""
+           userid="{% raw %}{{sessionState.userid}}{% endraw %}">
       </div>
 
       <!-- Searchbar -->

@@ -6,14 +6,14 @@ module.exports = class AppController
     '$controller', '$document', '$location', '$rootScope', '$route', '$scope',
     '$window',
     'auth', 'drafts', 'features', 'identity',
-    'permissions', 'streamer', 'annotationUI',
+    'permissions', 'session', 'streamer', 'annotationUI',
     'annotationMapper', 'threading'
   ]
   constructor: (
      $controller,   $document,   $location,   $rootScope,   $route,   $scope,
      $window,
      auth,   drafts,   features,   identity,
-     permissions,   streamer,   annotationUI,
+     permissions,   session,   streamer,   annotationUI,
      annotationMapper, threading
   ) ->
     $controller('AnnotationUIController', {$scope})
@@ -22,6 +22,9 @@ module.exports = class AppController
     #
     #     if ($scope.feature('foo')) { ... }
     $scope.feature = features.flagEnabled
+
+    # Allow all child scopes access to the current session state:
+    $scope.sessionState = session.state
 
     $scope.auth = auth
     isFirstRun = $location.search().hasOwnProperty('firstrun')
