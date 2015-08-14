@@ -2,8 +2,11 @@
 
 """HTTP/REST API for interacting with the annotation store."""
 
+import json
 import logging
 
+import gevent
+from pyramid.response import Response
 from pyramid.view import view_config
 
 from h.api.auth import get_user
@@ -211,6 +214,71 @@ def delete(context, request):
         'id': id_,
         'deleted': True,
     }
+
+
+@view_config(context=Root, name='events')
+def event_source(request):
+    search_normalized_uris = request.feature('search_normalized')
+    user = get_user(request)
+
+    percolator = search_lib.percolator(
+        request.params,
+        user=user,
+        search_normalized_uris=search_normalized_uris
+    )
+
+    if 'X-Client-Id' in request.headers:
+        percolator['id'] = request.headers['X-Client-Id']
+
+    percolator['_ttl'] = 60000
+    percolator.save()
+
+    app_iter = _consume_annotation_events(request, percolator)
+    response = Response(app_iter=app_iter, content_type='text/event-stream')
+    response.cache_control = 'no-cache'
+
+    return response
+
+
+def _consume_annotation_events(request, percolator):
+    queue = gevent.queue.Queue()
+
+    topic_id = 'percolator-{}#ephemeral'.format(percolator['id'])
+    reader = request.get_queue_reader(topic_id, 'clients#ephemeral')
+
+    def on_message(reader, message=None):
+        if message is not None:
+            event = json.loads(message.body)
+            queue.put(event)
+
+    reader.on_message.connect(on_message)
+    reader.start(block=False)
+
+    def refresh():
+        while True:
+            gevent.sleep(45)
+            percolator.save()
+
+    refreshlet = gevent.spawn(refresh)
+
+    try:
+        while True:
+            try:
+                event = queue.get(block=True, timeout=30)
+                action = event['action']
+                data = json.dumps(event['annotation'])
+                yield 'event:{}\ndata:{}\n\n'.format(action, data)
+            except gevent.queue.Empty:
+                # heartbeat
+                yield ':\n'
+    except GeneratorExit:
+        pass
+    finally:
+        reader.close()
+        reader.join()
+        refreshlet.kill()
+        refreshlet.join()
+        percolator.delete()
 
 
 def _publish_annotation_event(request, annotation, action):

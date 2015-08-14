@@ -2,6 +2,7 @@
 
 from h.api.search.core import index
 from h.api.search.core import search
+from h.api.search.core import percolator
 from h.api.search.transform import prepare
 from h.api.search.transform import render
 
@@ -10,4 +11,5 @@ __all__ = (
     'prepare',
     'render',
     'search',
+    'percolator',
 )

@@ -55,3 +55,11 @@ def index(user=None, search_normalized_uris=False):
     return search(webob.multidict.NestedMultiDict({"limit": 20}),
                   user=user,
                   search_normalized_uris=search_normalized_uris)
+
+
+def percolator(request_params, user=None, search_normalized_uris=False):
+    userid = user.id if user else None
+    body = query.build(request_params,
+                       userid=userid,
+                       search_normalized_uris=search_normalized_uris)
+    return models.Percolator(body)

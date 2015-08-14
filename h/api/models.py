@@ -5,6 +5,7 @@ from pyramid import security
 
 from annotator import annotation
 from annotator import document
+from annotator import es
 
 
 class Annotation(annotation.Annotation):
@@ -47,6 +48,7 @@ class Annotation(annotation.Annotation):
         'tags': {'type': 'string', 'analyzer': 'uni_normalizer'},
         'text': {'type': 'string', 'analyzer': 'uni_normalizer'},
         'deleted': {'type': 'boolean'},
+        'nipsa': {'type': 'boolean'},
         'uri': {
             'type': 'string',
             'index_analyzer': 'uri',
@@ -185,6 +187,12 @@ class Annotation(annotation.Annotation):
     def get_analysis(cls):
         return cls.__analysis__
 
+    def percolate(self):
+        return self.es.conn.percolate(index=self.es.index,
+                                      doc_type=self.__type__,
+                                      body={'doc': self},
+                                      percolate_format='ids')
+
 
 class Document(document.Document):
     __analysis__ = {}
@@ -198,3 +206,25 @@ class Document(document.Document):
         mapping = super(Document, cls).get_mapping()
         mapping['document']['date_detection'] = False
         return mapping
+
+
+class Percolator(es.Model):
+    __type__ = '.percolator'
+    __mapping__ = {
+        '_ttl': {'enabled': True},
+    }
+
+    @classmethod
+    def get_analysis(cls):
+        return {}
+
+    @classmethod
+    def get_mapping(cls):
+        return {
+            cls.__type__: {
+                '_id': {
+                    'path': 'id',
+                },
+                '_ttl': {'enabled': True},
+            }
+        }
