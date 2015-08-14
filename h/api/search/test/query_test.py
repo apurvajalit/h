@@ -239,10 +239,14 @@ def test_build_for_uri(uri):
         request_params=multidict.NestedMultiDict(
             {"uri": "http://whitehouse.gov/"}))
 
-    assert q1["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"uri": "http://example.com/"}}]}}
-    assert q2["query"]["filtered"]["query"] == {
-        "bool": {"must": [{"match": {"uri": "http://whitehouse.gov/"}}]}}
+    assert q1["query"]["filtered"]["filter"]["and"] == [
+        {"query": {"match": {"uri": "http://example.com/"}}},
+        {'bool': {'should': [{'not': {'term': {'nipsa': True}}}]}},
+    ]
+    assert q2["query"]["filtered"]["filter"]["and"] == [
+        {"query": {"match": {"uri": "http://whitehouse.gov/"}}},
+        {'bool': {'should': [{'not': {'term': {'nipsa': True}}}]}},
+    ]
 
 
 @mock.patch("h.api.search.query.uri")
@@ -264,22 +268,20 @@ def test_build_for_uri_with_multiple_representations(uri):
         request_params=multidict.NestedMultiDict(
             {"uri": "http://example.com/"}))
 
-    assert q["query"]["filtered"]["query"] == {
-        "bool": {
-            "must": [
-                {
-                    "bool": {
-                        "minimum_should_match": 1,
-                        "should": [
-                            {"match": {"uri": "http://example.com/"}},
-                            {"match": {"uri": "http://example2.com/"}},
-                            {"match": {"uri": "http://example3.com/"}}
-                        ]
-                    }
+    assert q["query"]["filtered"]["filter"]["and"] == [
+        {
+            "query": {
+                "bool": {
+                    "should": [
+                        {"match": {"uri": "http://example.com/"}},
+                        {"match": {"uri": "http://example2.com/"}},
+                        {"match": {"uri": "http://example3.com/"}}
+                    ]
                 }
-            ]
-        }
-    }
+            }
+        },
+        {'bool': {'should': [{'not': {'term': {'nipsa': True}}}]}},
+    ]
 
 
 @mock.patch("h.api.search.query.uri")

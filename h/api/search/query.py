@@ -56,9 +56,9 @@ def build(request_params, userid=None, search_normalized_uris=False):
     if uri_param is None:
         pass
     elif search_normalized_uris:
-        filters.append(_term_clause_for_uri(uri_param))
+        filters.append(_filter_for_uri_term(uri_param))
     else:
-        matches.append(_match_clause_for_uri(uri_param))
+        filters.append(_filter_for_uri_match(uri_param))
 
     if "any" in request_params:
         matches.append({
@@ -97,29 +97,24 @@ def build(request_params, userid=None, search_normalized_uris=False):
     }
 
 
-def _match_clause_for_uri(uristr):
+def _filter_for_uri_match(uristr):
     """Return an Elasticsearch match clause dict for the given URI."""
     uristrs = uri.expand(uristr)
-    matchers = [{"match": {"uri": u}} for u in uristrs]
+    clauses = [{"match": {"uri": u}} for u in uristrs]
 
-    if len(matchers) == 1:
-        return matchers[0]
-    return {
-        "bool": {
-            "minimum_should_match": 1,
-            "should": matchers
-        }
-    }
+    if len(clauses) == 1:
+        return {"query": clauses[0]}
+    return {"query": {"bool": {"should": clauses}}}
 
 
-def _term_clause_for_uri(uristr):
+def _filter_for_uri_term(uristr):
     """Return an Elasticsearch term clause for the given URI."""
     uristrs = uri.expand(uristr)
-    filters = [{"term": {"target.source_normalized": uri.normalize(u)}}
+    clauses = [{"term": {"target.source_normalized": uri.normalize(u)}}
                for u in uristrs]
 
-    if len(filters) == 1:
-        return filters[0]
+    if len(clauses) == 1:
+        return clauses[0]
     return {
-        "or": filters
+        "or": clauses
     }
