@@ -175,14 +175,14 @@ def test_build_with_combined_user_and_tag_query():
             {"user": "bob", "tags": "foo"}))
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"must": [
+        "bool": {"should": [
             {"match": {"user": "bob"}},
             {"match": {"tags": "foo"}},
         ]}}
 
 
 def test_build_with_keyword():
-    """Keywords are returned in the query dict in a "multi_match" clause."""
+    """Keywords are returned in a "simple_query_string" clause."""
     params = multidict.MultiDict()
     params.add("any", "howdy")
 
@@ -192,11 +192,10 @@ def test_build_with_keyword():
         "bool": {
             "should": [
                 {
-                    "multi_match": {
+                    "simple_query_string": {
                         "fields": ["quote", "tags", "text", "uri.parts",
                                    "user"],
-                        "query": ["howdy"],
-                        "type": "cross_fields"
+                        "query": "howdy",
                     }
                 }
             ]
@@ -213,10 +212,9 @@ def test_build_with_multiple_keywords():
     q = query.build(request_params=params)
 
     assert q["query"]["filtered"]["query"] == {
-        "bool": {"should": [{"multi_match": {
+        "bool": {"should": [{"simple_query_string": {
             "fields": ["quote", "tags", "text", "uri.parts", "user"],
-            "query": ["howdy", "there"],
-            "type": "cross_fields"
+            "query": "howdy there",
         }}]}
     }
 

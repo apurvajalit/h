@@ -62,10 +62,9 @@ def build(request_params, userid=None, search_normalized_uris=False):
 
     if "any" in request_params:
         matches.append({
-            "multi_match": {
+            "simple_query_string": {
                 "fields": ["quote", "tags", "text", "uri.parts", "user"],
-                "query": request_params.getall("any"),
-                "type": "cross_fields"
+                "query": ' '.join(request_params.getall("any"))
             }
         })
         del request_params["any"]
