@@ -79,7 +79,7 @@ def build(request_params, userid=None, search_normalized_uris=False):
     query = {"match_all": {}}
 
     if matches:
-        query = {"bool": {"must": matches}}
+        query = {"bool": {"should": matches}}
 
     if filters:
         query = {
