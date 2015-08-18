@@ -32,9 +32,7 @@
   "background": {
     "persistent": true,
     "scripts": [
-      "lib/feature-detect.js",
       "lib/pdfHandler.js",
-      "lib/preserve-referer.js",
 
       "lib/tab-store.js",
       "lib/tab-state.js",
