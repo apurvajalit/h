@@ -14,10 +14,14 @@
          ng-href="{{vm.baseURI}}u/{{vm.annotation.user}}"
          >{{vm.annotation.user | persona}}</a>
       <i class="h-icon-border-color" ng-show="vm.isHighlight() && !vm.editing" title="This is a highlight. Click 'edit' to add a note or tag."></i>
+      
+     <!--
       <span ng-show="vm.isPrivate() && !vm.editing"
             title="This annotation is visible only to you.">
         <i class="h-icon-lock"></i> Private
       </span>
+      -->
+
       <span class="annotation-citation"
             ng-if="!vm.embedded"
             ng-show="vm.document.title">
@@ -28,6 +32,7 @@
               >({{vm.document.domain}})</span>
       </span>
       <!-- Editing controls -->
+	<!--
       <aside class="pull-right" ng-if="vm.editing">
         <privacy ng-click="$event.stopPropagation()"
                  ng-if="vm.annotation.permissions && vm.editing && action != 'delete'"
@@ -37,6 +42,7 @@
                  class="dropdown privacy pull-right"
                  name="privacy" />
       </aside>
+	-->
       <!-- / Editing controls -->
     </span>
 
@@ -114,13 +120,14 @@
   <!-- / Tags -->
 
   <footer class="annotation-footer">
+<!--
     <div class="small" ng-if="vm.editing">
       <p ng-show="vm.privacyLevel.text == 'Only Me'">
         <i class="h-icon-lock"></i> This annotation is visible only to you.</p>
       <p ng-show="vm.privacyLevel.text == 'Public'">
         <i class="h-icon-public"></i> This annotation is visible to everyone.</p>
     </div>
-
+-->
     <div class="form-actions" ng-if="vm.editing" ng-switch="vm.action">
       <div class="form-actions-buttons form-actions-left">
         <button ng-switch-when="edit"
@@ -137,7 +144,7 @@
                 ><i class="h-icon-cancel btn-icon"></i> Cancel</button>
       </div>
     </div>
-
+<!--
     <div class="annotation-section annotation-license" ng-if="vm.editing">
       <a href="http://creativecommons.org/publicdomain/zero/1.0/"
          title="View more information about the Creative Commons Public Domain license"
@@ -146,7 +153,7 @@
         Annotations can be freely reused by anyone for any purpose.
       </a>
     </div>
-
+-->
     <div class="annotation-replies" ng-if="replyCount > 0">
       <a class="reply-count small" href=""
          ng-click="replyCountClick()"
@@ -155,9 +162,9 @@
     </div>
 
     <div class="annotation-actions" ng-if="!vm.editing && vm.annotation.id">
-      <button class="small btn-clean"
+  <!--    <button class="small btn-clean"
               ng-click="vm.reply()"
-              ><i class="h-icon-reply btn-icon"></i> Reply</button>
+              ><i class="h-icon-reply btn-icon"></i> Reply</button> -->
       <span class="share-dialog-wrapper">
         <button class="small btn-clean"
                 ng-click="share($event)"
