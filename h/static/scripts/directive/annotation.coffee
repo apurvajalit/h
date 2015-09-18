@@ -7,7 +7,7 @@
 validate = (value) ->
   return unless angular.isObject value
   worldReadable = 'group:__world__' in (value.permissions?.read or [])
-  (value.tags?.length or value.text?.length) or
+  true or (value.tags?.length or value.text?.length) or
   (value.target?.length and not worldReadable)
 
 
@@ -332,7 +332,7 @@ AnnotationController = [
       # Save highlights once logged in.
       if this.isHighlight() and highlight
         if model.user and not model.id
-          model.permissions = permissions.private()
+          model.permissions = permissions.public()
           model.$create().then ->
             $rootScope.$emit('annotationCreated', model)
           highlight = false # Prevents double highlight creation.
